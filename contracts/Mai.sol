@@ -1,4 +1,4 @@
-pragma solidity >= 0.5.2;
+pragma solidity 0.6.4;
 //ERC20 Interface nice
 interface ERC20 {
     function totalSupply() external view returns (uint256);
@@ -48,17 +48,18 @@ contract Mai is ERC20{
     string public name = "Mai Coin";
     string public symbol = "MAI";
     uint256 public decimals  = 18;
-    uint256 public totalMai;
+    uint256 public override totalSupply;
     uint256 public _1 = 10**decimals;
 
     bool private notEntered;
 
-    mapping(address => uint256) public balances;
-    mapping(address => mapping(address => uint256)) public allowances;
+    mapping(address => uint256) public override balanceOf;
+    mapping(address => mapping(address => uint256)) public override allowance;
     mapping(uint256 => CDPData) public mapCDPData;
     mapping(address => MemberData) public mapAddressMemberData;
 
     uint32 public countOfCDPs;
+    uint public minCollaterisation;
     uint256 public defaultCollateralisation = 150;
     uint256 public etherPrice;
 
@@ -96,57 +97,48 @@ contract Mai is ERC20{
     event Testing2 (uint256 val1, uint256 val2);
     event Testing3 (uint256 val1, uint256 val2, uint256 val3);
 
-     function totalSupply() public view returns (uint256) {
-       return totalMai;
-    }
-    function balanceOf(address tokenOwner) public  view returns (uint) {
-        return balances[tokenOwner];
-    }
-    function transfer(address to, uint256 amount) public  returns (bool success) {
+    function transfer(address to, uint256 amount) public override  returns (bool success) {
         _transfer(msg.sender, to, amount);
         return true;
     }
-    function approve(address spender, uint256 amount) public  returns (bool success) {
+    function approve(address spender, uint256 amount) public override  returns (bool success) {
         _approve(msg.sender, spender, amount);
         return true;
     }
     function _approve(address _approver, address _spender, uint256 _amount) internal returns (bool success){
-        allowances[_approver][_spender] = _amount;
+        allowance[_approver][_spender] = _amount;
         emit Approval(_approver, _spender, _amount);
         return true;
     }
-    function allowance(address tokenOwner, address spender) public  view returns (uint256) {
-        return allowances[tokenOwner][spender];
-    }
     //Transfer function
     function _transfer(address _from, address _to, uint256 _amount) internal returns (bool success) {
-        require(balances[_from] >= _amount,'Sender must have enough to spend');
-        balances[_from] = balances[_from].sub(_amount);
-        balances[_to] = balances[_to].add(_amount);
+        require(balanceOf[_from] >= _amount,'Sender must have enough to spend');
+        balanceOf[_from] = balanceOf[_from].sub(_amount);
+        balanceOf[_to] = balanceOf[_to].add(_amount);
         emit Transfer(_from, _to, _amount);
         return true;
     }
 
     //Delegate a Transfer
-    function transferFrom(address from, address to, uint256 amount) public returns (bool success) {
-        require(amount <= allowances[from][to], 'Sender must have enough allowance to send');
-        allowances[from][to] = allowances[from][to].sub(amount);
+    function transferFrom(address from, address to, uint256 amount) public override returns (bool success) {
+        require(amount <= allowance[from][to], 'Sender must have enough allowance to send');
+        allowance[from][to] = allowance[from][to].sub(amount);
         _transfer(from, to, amount);
         return true;
     }
 
     function _mint(uint256 _amount) internal returns (bool success){
         require(_amount > 0);
-        totalMai = totalMai.add(_amount);
-        balances[address(this)] = balances[address(this)].add(_amount);
+        totalSupply = totalSupply.add(_amount);
+        balanceOf[address(this)] = balanceOf[address(this)].add(_amount);
         emit Transfer(address(0), address(this), _amount);
         return true;
     }
 
     function _burn(uint256 _amount) internal returns (bool success){
-        require (_amount > 0); require (_amount <= balances[address(this)]);
-        totalMai = totalMai.sub(_amount);
-        balances[address(this)] = balances[address(this)].sub(_amount);
+        require (_amount > 0); require (_amount <= balanceOf[address(this)]);
+        totalSupply = totalSupply.sub(_amount);
+        balanceOf[address(this)] = balanceOf[address(this)].sub(_amount);
         emit Transfer(address(this), address(0), _amount);
         return true;
     }
@@ -159,6 +151,7 @@ contract Mai is ERC20{
         mapTokenExchangeData[address(0)].assetBalance = 10*_1;
         mapTokenExchangeData[address(0)].listed = true;
         exchanges.push(address(0));
+        minCollaterisation = 101;
 
         // USD pool
         mapTokenExchangeData[address(0xA29713944a53ed8A220a4c96cA62EFfaa23BE812)].maiBalance = 1100*_1;
@@ -168,14 +161,14 @@ contract Mai is ERC20{
     }
 
 
-    function() external payable {
+    receive() external payable {
       require (msg.value > 0, 'Must be more than 0 to open CDP');
       _manageCDP(msg.sender, msg.value, defaultCollateralisation);
     }
 
     function openCDP(uint256 collateralisation) public payable returns (bool success) {
       require (msg.value > 0, 'Must be more than 0 to open CDP');
-      require (collateralisation >= 100, "Must be greater than 100%");
+      require (collateralisation >= minCollaterisation, "Must be greater than 101%");
       _manageCDP(msg.sender, msg.value, collateralisation);
       return true;
     }
@@ -190,7 +183,7 @@ contract Mai is ERC20{
     }
 
     function remintMAIFromCDP(uint256 collateralisation) public payable returns (bool success) {
-        require (collateralisation >= 100, "Must be greater than 100%");
+        require (collateralisation >= minCollaterisation, "Must be greater than 101%");
         uint32 CDP = mapAddressMemberData[msg.sender].CDP;
         require (CDP != 0, "Must be an owner already");
         uint256 collateral = mapCDPData[CDP].collateral;

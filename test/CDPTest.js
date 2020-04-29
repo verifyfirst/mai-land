@@ -11,27 +11,29 @@ const _1BN = new BigNumber(_1)
 var _dot01 = new BigNumber(1 * 10 ** 16)
 const ethAddr = "0x0000000000000000000000000000000000000000"
 const usdAddr = "0xA29713944a53ed8A220a4c96cA62EFfaa23BE812"
-const etherPool = {"asset":(10*_1).toString(), "mai": (1500*_1).toString()}
+const etherPool = {"asset":(10*_1).toString(), "mai": (int2BN(1500).times(_1BN)).toFixed()}
 const usdPool = {"asset": (1000*_1).toString(), "mai": (1100*_1).toString()}
 
 contract('Mai', function (accounts) {
 
   constructor(accounts)
-  //checkMath()
-  //checkPrices()
-  // openCDP(_1BN, acc0)
-  // openCDP(_1BN, acc0)
-  openCDP(_1BN, 99, acc0)
-  // closeCDP(acc0, 5000)
-  // openCDP(_1BN, acc0)
-  // addCollateralToCDP(acc0)
-  closeCDP(acc0, 10000)
+  // checkMath(_1)
+  // checkPrices()
+  openCDP(_dot01, 150, acc1)
+  openCDP(_dot01, 150, acc1)
+  openCDP(_dot01, 101, acc1)
+  //testFailCDP(_1BN, 99, acc0)
+  closeCDP(acc1, 5000)
+  openCDP(_dot01, 150, acc1)
+  addCollateralToCDP(acc1)
+  closeCDP(acc1, 10000)
 })
 
 function BN2Int(BN) { return +(new BigNumber(BN)).toFixed() }
 function BN2Str(BN) { return (new BigNumber(BN)).toFixed() }
 function int2BN(int) { return (new BigNumber(int)) }
 function int2Str(int) { return ((int).toString()) }
+function int2Num(int) {return (int/(1*10**18))}
 
 function constructor(accounts) {
 
@@ -56,14 +58,19 @@ function constructor(accounts) {
 }
 
 
-function checkMath() {
+function checkMath(_val) {
   it("Checks core math", async () => {
-    const output = BN2Int(await coin.getCLPSwap(int2Str(_1), int2Str(etherPool.asset), int2Str(etherPool.mai)))
-    assert.equal(output, 37500000000000000000,"swap is correct")
-    const fee = BN2Int(await coin.getCLPFee(int2Str(_1), int2Str(etherPool.asset), int2Str(etherPool.mai)))
-    assert.equal(fee, 37500000000000000000,"fee is correct")
-    const liquidation = BN2Int(await coin.getCLPLiquidation(int2Str(_dot01), int2Str(etherPool.asset), int2Str(etherPool.mai)))
-    assert.equal(liquidation, 1455739633369277400,"liquidation is correct")
+    const output = BN2Int(await coin.getCLPSwap(int2Str(_val), int2Str(etherPool.asset), int2Str(etherPool.mai)))
+    const _output = _getCLPSwap(_val, +etherPool.asset, +etherPool.mai)
+    assert.equal(output, _output,"swap is correct")
+    const fee = BN2Int(await coin.getCLPFee(int2Str(_val), int2Str(etherPool.asset), int2Str(etherPool.mai)))
+    const _fee = _getCLPFee(_val, +etherPool.asset, +etherPool.mai)
+    assert.equal(fee, _fee,"fee is correct")
+    const liquidation = BN2Int(await coin.getCLPLiquidation(int2Str(_val), int2Str(etherPool.asset), int2Str(etherPool.mai)))
+    const _liquidation = _getCLPLiquidation(_val, +etherPool.asset, +etherPool.mai)
+    assert.equal(liquidation, _liquidation,"liquidation is correct")
+    console.log("x:%s, X:%s, Y:%s, y:%s, fee:%s, lP:%s", int2Num(+_val), int2Num(+etherPool.asset), 
+    int2Num(+etherPool.mai), int2Num(+output), int2Num(+fee), int2Num(+liquidation))
   })
 }
 
@@ -95,37 +102,39 @@ function checkPrices() {
 }
 
 
-function openCDP(eth, _ratio, _acc) {
+function openCDP(_eth, _ratio, _acc) {
 
-  var existingDebt; var existingCollateral; var CDP;
+  var existingDebt = 0; var existingCollateral = 0; var CDP;
   var newDebt; var newCollateral;
 
   it("Allows opening CDP", async () => {
 
-    CDP = BN2Int(await coin.mapAddressMemberData(_acc))
-    existingDebt = BN2Int((await coin.mapCDPData(CDP)).debt)
-    existingCollateral = new BigNumber((await coin.mapCDPData(CDP)).collateral)
+    console.log(_acc)
 
-    newCollateral = eth
+    //CDP = (await coin.mapAddressMemberData.call(_acc)).CDP
+    const CDP = BN2Int(await coin.mapAddressMemberData.call(_acc))
+    console.log("CDP:", CDP)
+    if(CDP > 0){
+      existingDebt = BN2Int((await coin.mapCDPData.call(CDP)).debt)
+      existingCollateral = new BigNumber((await coin.mapCDPData.call(CDP)).collateral)
+    }
 
-    const ethPPInMAI = BN2Str(await coin.getEtherPPinMAI(int2Str(eth)))
+    newCollateral = _eth
+    const ethPPInMAI = BN2Str(await coin.getEtherPPinMAI(int2Str(_eth)))
     //console.log(logType(ethPPInMAI))
-
-    const ethPP = getEtherPPinMAI(int2Str(eth)).toString()
+    const ethPP = getEtherPPinMAI(int2Str(_eth)).toString()
     //console.log(logType(ethPP))
-    
     assertLog(ethPPInMAI, ethPP, "etherPP is correct")
     //console.log(ethPPInMAI, ethPP)
-
     const mintAmount = (BN2Int(ethPPInMAI) * 100) / (_ratio);
     //console.log("mintAmount", mintAmount)
     newDebt = mintAmount
  
     var tx1;
     if (_ratio === 150) {
-      tx1 = await coin.send(eth, { from: _acc });
+      tx1 = await coin.send(_eth, { from: _acc });
     } else {
-      tx1 = await coin.openCDP(_ratio, { from: _acc , value:eth});
+      tx1 = await coin.openCDP(_ratio, { from: _acc , value:_eth});
     }
     
     //console.log(tx1.receipt)
@@ -151,7 +160,6 @@ function openCDP(eth, _ratio, _acc) {
 
     let maiSupply = BN2Int(await coin.totalSupply())
     assertLog(maiSupply, (newDebt + +existingDebt), "correct new supply")
-
     //console.log(maiAddressBal, acc0Bal, maiSupply)
 
   })
@@ -167,7 +175,7 @@ function openCDP(eth, _ratio, _acc) {
     assert.equal(_CDP, CDP, "correct mapAddressMemberData");
 
     let mapCDPData = await coin.mapCDPData(_CDP);
-    assertLog(mapCDPData.collateral, +newCollateral + +existingCollateral, "CDP Collateral")
+    assert.equal(mapCDPData.collateral, +newCollateral + +existingCollateral, "CDP Collateral")
     assertLog(mapCDPData.debt, newDebt + +existingDebt, "CDP Debt");
     assert.equal(mapCDPData.owner, _acc, "correct owner");
   })
@@ -228,6 +236,40 @@ function _getCLPSwap(x, X, Y){
   const numerator = _x.times(_Y).times(_X)
   const denominator = (_x.plus(_X)).times((_x.plus(_X)))
   const _y = numerator.div(denominator)
+  const y = BN2Int(_y);
+  // const numerator = x * Y * X;
+  // const denominator = (x + X) * (x + X );
+  // const y = numerator / denominator;
+  //console.log("clpswap", _x, _X, _Y, numerator, denominator, y)
+  return y;
+}
+
+function _getCLPFee(x, X, Y){
+  // y = (x * Y * x) / (x + X)^2
+  const _x = new int2BN(x)
+  const _X = new int2BN(X)
+  const _Y = new int2BN(Y)
+  // assume BN
+  const numerator = _x.times(_Y.times(_x));
+  const denominator = (_x.plus(_X)).times(_x.plus(_X));
+  const _y = numerator.div(denominator);
+  const y = BN2Int(_y);
+  // const numerator = x * Y * X;
+  // const denominator = (x + X) * (x + X );
+  // const y = numerator / denominator;
+  //console.log("clpswap", _x, _X, _Y, numerator, denominator, y)
+  return y;
+}
+
+function _getCLPLiquidation(x, X, Y){
+  // y = (x * Y * (X - x))/(x + X)^2
+  const _x = new int2BN(x)
+  const _X = new int2BN(X)
+  const _Y = new int2BN(Y)
+  // assume BN
+  const numerator = _x.times(_Y.times(_X.minus(_x)));
+  const denominator = (_x.plus(_X)).times(_x.plus(_X));
+  const _y = numerator.div(denominator);
   const y = BN2Int(_y);
   // const numerator = x * Y * X;
   // const denominator = (x + X) * (x + X );
