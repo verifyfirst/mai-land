@@ -19,14 +19,14 @@ contract('Mai', function (accounts) {
   constructor(accounts)
   // checkMath(_1)
   // checkPrices()
-  openCDP(_dot01, 150, acc1)
-  openCDP(_dot01, 150, acc1)
-  openCDP(_dot01, 101, acc1)
-  //testFailCDP(_1BN, 99, acc0)
-  closeCDP(acc1, 5000)
-  openCDP(_dot01, 150, acc1)
-  addCollateralToCDP(acc1)
-  closeCDP(acc1, 10000)
+  // openCDP(_dot01, 150, acc1)
+  // openCDP(_dot01, 150, acc1)
+  // openCDP(_dot01, 101, acc1)
+  testFailCDP(_dot01, 100, acc1)
+  // closeCDP(acc1, 5000)
+  // openCDP(_dot01, 150, acc1)
+  // addCollateralToCDP(acc1)
+  // closeCDP(acc1, 10000)
 })
 
 function BN2Int(BN) { return +(new BigNumber(BN)).toFixed() }
@@ -180,6 +180,31 @@ function openCDP(_eth, _ratio, _acc) {
     assert.equal(mapCDPData.owner, _acc, "correct owner");
   })
 }
+
+
+
+function testFailCDP(_eth, _ratio, _acc){
+  var existingDebt = 0; var existingCollateral = 0; var newCollateral;
+
+  it("tests <101 collaterisation fails to open CDP", async () => {
+
+    const CDP = BN2Int(await coin.mapAddressMemberData.call(_acc))
+
+    if(CDP > 0){
+      existingDebt = BN2Int((await coin.mapCDPData.call(CDP)).debt)
+      existingCollateral = new BigNumber((await coin.mapCDPData.call(CDP)).collateral)
+    }
+    newCollateral = _eth
+    
+    var tx1 =  await truffleAssert.reverts(coin.openCDP(_ratio, { from: _acc , value:_eth}));
+   
+    
+  });
+}
+
+
+
+
 
 function getValueInMai(token) {
   var result
