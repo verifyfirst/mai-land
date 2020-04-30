@@ -87,7 +87,7 @@ contract Mai is ERC20{
 
     // Events
     event NewCDP(uint32 CDP, uint time, address owner, uint256 debtIssued, uint256 collateralHeld, uint256 collateralisation);
-    event UpdateCDP(uint32 CDP, uint time, address owner, uint256 debtAdded, uint256 collateralAdded);
+    event UpdateCDP(uint32 CDP, uint time, address owner, uint256 debtAdded, uint256 collateralAdded, uint256 collateralisation);
     event CloseCDP(uint32 CDP, uint time, address owner, uint256 debtPaid, uint256 etherReturned);
     event LiquidateCDP(uint32 CDP, uint time, address liquidator, uint256 liquidation, uint256 etherSold, uint256 maiBought, uint256 debtBurnt, uint256 feeClaimed);
     event Transfer (address indexed from, address indexed to, uint256 amount);
@@ -178,7 +178,9 @@ contract Mai is ERC20{
         uint32 CDP = mapAddressMemberData[msg.sender].CDP;
         require (CDP > 0, "Must be an owner already");
         mapCDPData[CDP].collateral += msg.value;
-        emit UpdateCDP(CDP, now, msg.sender, 0, msg.value);
+        uint256 purchasingPower = getEtherPPinMAI(mapCDPData[CDP].collateral);//how valuable Ether is in MAI
+        uint256 collateralisation = ((purchasingPower).mul(100)).div(mapCDPData[CDP].debt);
+        emit UpdateCDP(CDP, now, msg.sender, 0, msg.value, collateralisation);
         return true;
     }
 
@@ -187,15 +189,13 @@ contract Mai is ERC20{
         uint32 CDP = mapAddressMemberData[msg.sender].CDP;
         require (CDP != 0, "Must be an owner already");
         uint256 collateral = mapCDPData[CDP].collateral;
-
-        uint256 purchasingPower = getEtherPriceInUSD(collateral);//how valuable Ether is in USD
+        uint256 purchasingPower = getEtherPPinMAI(collateral);//how valuable Ether is in MAI
         uint256 maxMintAmount = (purchasingPower.mul(collateralisation)).div(100);
-
         uint256 additionalMintAmount = maxMintAmount.sub(mapCDPData[CDP].debt);
         mapCDPData[CDP].debt += additionalMintAmount;
         _mint(additionalMintAmount);
         require (_transfer(address(this), msg.sender, additionalMintAmount), 'Must transfer mint amount to sender');
-        emit UpdateCDP(CDP, now, msg.sender, additionalMintAmount, 0);
+        emit UpdateCDP(CDP, now, msg.sender, additionalMintAmount, 0, collateralisation);
         return true;
     }
 
@@ -203,7 +203,6 @@ contract Mai is ERC20{
       uint256 purchasingPower = getEtherPPinMAI(_value);//how valuable Ether is in USD
       uint256 mintAmount = (purchasingPower.mul(100)).div(_collateralisation);
       //uint256 mintAmount = 100000000000;
-
       uint32 CDP = mapAddressMemberData[_owner].CDP;
       if (CDP != 0) {
           mapCDPData[CDP].collateral += _value;

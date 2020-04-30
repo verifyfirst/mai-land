@@ -17,15 +17,16 @@ const usdPool = { "asset": (1000 * _1).toString(), "mai": (1100 * _1).toString()
 contract('Mai', function (accounts) {
 
   constructor(accounts)
-  // checkMath(_1)
-  // checkPrices()
+  checkMath(_1)
+  checkPrices()
   openCDP(_dot01, 150, acc1)
   openCDP(_dot01, 150, acc1)
   openCDP(_dot01, 101, acc1)
   testFailCDP(_dot01, 100, acc1)
   closeCDP(acc1, 5000)
   openCDP(_dot01, 150, acc1)
-  addCollateralToCDP(acc1)
+  addCollateralToCDP(_dot01, acc1)
+  remintMAIFromCDP(101, acc1)
   closeCDP(acc1, 10000)
 })
 
@@ -258,29 +259,74 @@ function closeCDP(_acc, _bp) {
   })
 }
 
-function addCollateralToCDP(_acc) {
+function addCollateralToCDP(_eth, _acc) {
 
   it("Allows adding to  CDP", async () => {
-    let eth = _dot01
 
     let CDP = BN2Int(await coin.mapAddressMemberData(_acc))
     //console.log("CDP", CDP)
-    //let existingDebt = BN2Int((await coin.mapCDPData(CDP)).debt)
+    let existingDebt = BN2Int((await coin.mapCDPData(CDP)).debt)
     //console.log("existingDebt", existingDebt)
     let existingCollateral = new BigNumber((await coin.mapCDPData(CDP)).collateral)
+    const ethPP = getEtherPPinMAI(existingCollateral.plus(_eth))
+    const cltrzn  = Math.round((ethPP * 100) / existingDebt)
     //open CDP
-    let tx1 = await coin.addCollateralToCDP({ from: _acc, to: maiAddress, value: eth });
+    let tx1 = await coin.addCollateralToCDP({ from: _acc, to: maiAddress, value: _eth });
     assert.equal(tx1.logs.length, 1, "one event was triggered");
     assert.equal(tx1.logs[0].event, "UpdateCDP", "UpdateCDP was called");
     assert.equal(tx1.logs[0].args.CDP, CDP, "CDP is correct");
     //assert.equal(BN2Int(tx1.logs[1].args.time), issuedMai, "amount is correct");
     assert.equal(tx1.logs[0].args.owner, _acc, "owner is correct");
     assert.equal(BN2Int(tx1.logs[0].args.debtAdded), 0, "debt is correct");
-    assert.equal(BN2Int(tx1.logs[0].args.collateralAdded), eth, "collateral is correct");
+    assert.equal(BN2Int(tx1.logs[0].args.collateralAdded), _eth, "collateral is correct");
+    assert.equal(BN2Int(tx1.logs[0].args.collateralisation), cltrzn, "collateralisation is correct");
 
     let newCollateral = new BigNumber((await coin.mapCDPData(CDP)).collateral)
-    assert.equal(BN2Int(newCollateral), BN2Int(existingCollateral.plus(eth)), "New collateral is correct")
+    assert.equal(BN2Int(newCollateral), BN2Int(existingCollateral.plus(_eth)), "New collateral is correct")
   });
+}
+
+function remintMAIFromCDP(_ratio, _acc) {
+
+  var newDebt;
+
+  it("Allows reminting MAI from CDP", async () => {
+
+    let CDP = BN2Int(await coin.mapAddressMemberData(_acc))
+    let existingDebt = BN2Int((await coin.mapCDPData(CDP)).debt)
+    let existingCollateral = new BigNumber((await coin.mapCDPData(CDP)).collateral)
+    const purchasingPower = getEtherPPinMAI(existingCollateral);//how valuable Ether is in MAI
+    const maxMintAmount = (purchasingPower * _ratio) / 100;
+    const additionalMintAmount = maxMintAmount - existingDebt;
+    newDebt = roundBN2Str(additionalMintAmount + existingDebt)
+    //console.log(purchasingPower, maxMintAmount, additionalMintAmount)
+
+    let tx1 = await coin.remintMAIFromCDP(_ratio, { from: _acc, to: maiAddress});
+    //console.log(tx1.logs[2])
+    assert.equal(tx1.logs.length, 3, "three events were triggered");
+    assert.equal(tx1.logs[2].event, "UpdateCDP", "UpdateCDP was called");
+    assert.equal(tx1.logs[2].args.CDP, CDP, "CDP is correct");
+    // //assert.equal(BN2Int(tx1.logs[1].args.time), issuedMai, "amount is correct");
+    assert.equal(tx1.logs[2].args.owner, _acc, "owner is correct");
+    assert.equal(BN2Int(tx1.logs[2].args.debtAdded), additionalMintAmount, "mint is correct");
+    assert.equal(BN2Int(tx1.logs[2].args.collateralAdded), 0, "collateral is correct");
+    assert.equal(BN2Int(tx1.logs[2].args.collateralisation), _ratio, "collateralisation is correct");
+
+  });
+
+    //test balance of account 0 for mai has increased
+  it("tests balances of MAI", async () => {
+    let maiAddressBal = BN2Int(await coin.balanceOf(maiAddress))
+    assert.equal(maiAddressBal, 0, "correct maiAddressBal bal");
+
+    let acc0Bal = roundBN2Str(await coin.balanceOf(_acc))
+    assert.equal(acc0Bal, newDebt, "correct _acc bal");
+
+    let maiSupply = roundBN2Str(await coin.totalSupply())
+    assert.equal(maiSupply, newDebt, "correct new supply")
+    //console.log(maiAddressBal, acc0Bal, maiSupply)
+
+  })
 }
 
 function getValueInMai(token) {
