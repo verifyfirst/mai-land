@@ -9,6 +9,7 @@ var acc0; var acc1; var acc2; var acc3;
 var _1 = 1 * 10 ** 18; // 1 ETH
 const _1BN = new BigNumber(_1)
 var _dot01 = new BigNumber(1 * 10 ** 16)
+var _dot2 = new BigNumber(2 * 10 ** 17)
 const ethAddr = "0x0000000000000000000000000000000000000000"
 const usdAddr = "0xA29713944a53ed8A220a4c96cA62EFfaa23BE812"
 const etherPool = { "asset": (10 * _1).toString(), "mai": (int2BN(1500).times(_1BN)).toFixed() }
@@ -17,26 +18,29 @@ const usdPool = { "asset": (1000 * _1).toString(), "mai": (1100 * _1).toString()
 contract('Mai', function (accounts) {
 
   constructor(accounts)
-  checkMath(_1)
-  checkPrices()
-  openCDP(_dot01, 150, acc1)
-  openCDP(_dot01, 150, acc1)
-  openCDP(_dot01, 101, acc1)
-  testFailCDP(_dot01, 100, acc1)
-  closeCDP(acc1, 5000)
-  openCDP(_dot01, 150, acc1)
-  addCollateralToCDP(_dot01, acc1)
-  remintMAIFromCDP(101, acc1)
-  closeCDP(acc1, 10000)
+  // checkMath(_1)
+  // checkPrices()
+  openCDP(_1, 101, acc1)
+  liquidateCDP(acc1, 3333)
+  // openCDP(_dot01, 150, acc1)
+  // openCDP(_dot01, 101, acc1)
+  // testFailCDP(_dot01, 100, acc1)
+  // closeCDP(acc1, 5000)
+  // openCDP(_dot01, 150, acc1)
+  // addCollateralToCDP(_dot01, acc1)
+  // remintMAIFromCDP(101, acc1)
+  //closeCDP(acc1, 10000)
 })
 
+//################################################################
+// HELPERS
 function BN2Int(BN) { return +(new BigNumber(BN)).toFixed() }
 function BN2Str(BN) { return (new BigNumber(BN)).toFixed() }
 function int2BN(int) { return (new BigNumber(int)) }
 function int2Str(int) { return ((int).toString()) }
 function int2Num(int) { return (int / (1 * 10 ** 18)) }
 function roundBN2Str(BN) {
-  const BN_ = (new BigNumber(BN)).toPrecision(8)
+  const BN_ = (new BigNumber(BN)).toPrecision(3)
   return BN2Str(BN_)
 }
 function roundBN2StrR(BN, x) {
@@ -50,6 +54,8 @@ function logType(thing) {
   console.log("%s type", thing, typeof thing)
 }
 
+//################################################################
+// CONSTRUCTION
 function constructor(accounts) {
   acc0 = accounts[0]; acc1 = accounts[1]; acc2 = accounts[2]; acc3 = accounts[3]
   it("constructor events", async () => {
@@ -70,6 +76,8 @@ function constructor(accounts) {
 
 }
 
+//################################################################
+// MATH
 function checkMath(_val) {
   it("Checks core math", async () => {
     const output = BN2Int(await coin.getCLPSwap(int2Str(_val), int2Str(etherPool.asset), int2Str(etherPool.mai)))
@@ -113,6 +121,8 @@ function checkPrices() {
   })
 }
 
+//################################################################
+// CDP INTERACTIONS
 function openCDP(_eth, _ratio, _acc) {
 
   var existingDebt = 0; var existingCollateral = 0; var CDP;
@@ -198,67 +208,6 @@ function testFailCDP(_eth, _ratio, _acc) {
   });
 }
 
-function closeCDP(_acc, _bp) {
-
-  var debtRemain; var collateralRemain;
-  var CDP;
-
-  it("Allows closing CDP", async () => {
-
-    let accEth1 = BN2Int(await web3.eth.getBalance(_acc))
-    CDP = BN2Int(await coin.mapAddressMemberData(_acc))
-    //console.log("CDP", CDP)
-    let existingDebt = BN2Int((await coin.mapCDPData(CDP)).debt)
-    //console.log("existingDebt", existingDebt)
-    let existingCollateral = new BigNumber((await coin.mapCDPData(CDP)).collateral)
-
-    let debtClosed = existingDebt * (_bp / 10000)
-    let collateralReturned = existingCollateral * (_bp / 10000)
-
-    debtRemain = existingDebt - debtClosed
-    collateralRemain = existingCollateral - collateralReturned
-
-    let tx1 = await coin.closeCDP(_bp, { from: _acc });
-    assert.equal(tx1.logs.length, 4, "Three events was triggered");
-    assert.equal(tx1.logs[0].event, "Approval", "Correct event");
-    assert.equal(tx1.logs[1].event, "Transfer", "Correct event");
-    assert.equal(tx1.logs[2].event, "Transfer", "Correct event");
-    assert.equal(tx1.logs[3].event, "CloseCDP", "Correct event");
-
-    assert.equal(tx1.logs[3].args.CDP, 1, "CDP is correct");
-    assert.equal(tx1.logs[3].args.owner, _acc, "Owner is correct");
-    assert.equal(BN2Int(tx1.logs[3].args.debtPaid), debtClosed, "Debt is correct");
-    assert.equal(BN2Int(tx1.logs[3].args.etherReturned), collateralReturned, "Collateral is correct");
-
-    let accBal = await coin.balanceOf(_acc);
-    assert.equal(BN2Int(accBal), debtRemain, "correct acc0 bal");
-
-    let maiSupply = await coin.totalSupply()
-    assert.equal(maiSupply, debtRemain, "correct new supply")
-
-    const tx = await web3.eth.getTransaction(tx1.tx);
-    const gasCost = tx.gasPrice * tx1.receipt.gasUsed;
-    //console.log(accEth1, etherReturned, gasCost)
-    //console.log((accEth1 + etherReturned) - gasCost)
-
-    let accEth2 = roundBN2StrR(await web3.eth.getBalance(_acc), 3)
-    assert.equal(accEth2, roundBN2StrR((+accEth1 + +BN2Int(existingCollateral) - gasCost), 3), "gas test")
-
-    let accEthMAI = roundBN2Str(await web3.eth.getBalance(maiAddress))
-    assert.equal(accEthMAI, roundBN2Str(collateralRemain), "ethaccBal")
-
-  })
-
-  // Test mappings
-  it("Tests mappings", async () => {
-
-    let mapCDPData = await coin.mapCDPData(CDP);
-    assert.equal(mapCDPData.collateral, collateralRemain, "correct collateral");
-    assert.equal(mapCDPData.debt, debtRemain, "correct debt");
-
-  })
-}
-
 function addCollateralToCDP(_eth, _acc) {
 
   it("Allows adding to  CDP", async () => {
@@ -329,6 +278,107 @@ function remintMAIFromCDP(_ratio, _acc) {
   })
 }
 
+function closeCDP(_acc, _bp) {
+
+  var debtRemain; var collateralRemain;
+  var CDP;
+
+  it("Allows closing CDP", async () => {
+
+    let accEth1 = BN2Int(await web3.eth.getBalance(_acc))
+    CDP = BN2Int(await coin.mapAddressMemberData(_acc))
+    //console.log("CDP", CDP)
+    let existingDebt = BN2Int((await coin.mapCDPData(CDP)).debt)
+    //console.log("existingDebt", existingDebt)
+    let existingCollateral = new BigNumber((await coin.mapCDPData(CDP)).collateral)
+
+    let debtClosed = existingDebt * (_bp / 10000)
+    let collateralReturned = existingCollateral * (_bp / 10000)
+
+    debtRemain = existingDebt - debtClosed
+    collateralRemain = existingCollateral - collateralReturned
+
+    let tx1 = await coin.closeCDP(_bp, { from: _acc });
+    assert.equal(tx1.logs.length, 4, "Three events was triggered");
+    assert.equal(tx1.logs[0].event, "Approval", "Correct event");
+    assert.equal(tx1.logs[1].event, "Transfer", "Correct event");
+    assert.equal(tx1.logs[2].event, "Transfer", "Correct event");
+    assert.equal(tx1.logs[3].event, "CloseCDP", "Correct event");
+
+    assert.equal(tx1.logs[3].args.CDP, 1, "CDP is correct");
+    assert.equal(tx1.logs[3].args.owner, _acc, "Owner is correct");
+    assert.equal(BN2Int(tx1.logs[3].args.debtPaid), debtClosed, "Debt is correct");
+    assert.equal(BN2Int(tx1.logs[3].args.etherReturned), collateralReturned, "Collateral is correct");
+
+    let accBal = await coin.balanceOf(_acc);
+    assert.equal(BN2Int(accBal), debtRemain, "correct acc0 bal");
+
+    let maiSupply = await coin.totalSupply()
+    assert.equal(maiSupply, debtRemain, "correct new supply")
+
+    const tx = await web3.eth.getTransaction(tx1.tx);
+    const gasCost = tx.gasPrice * tx1.receipt.gasUsed;
+    //console.log(accEth1, etherReturned, gasCost)
+    //console.log((accEth1 + etherReturned) - gasCost)
+
+    let accEth2 = roundBN2StrR(await web3.eth.getBalance(_acc), 3)
+    assert.equal(accEth2, roundBN2StrR((+accEth1 + +BN2Int(existingCollateral) - gasCost), 3), "gas test")
+
+    let accEthMAI = roundBN2Str(await web3.eth.getBalance(maiAddress))
+    assert.equal(accEthMAI, roundBN2Str(collateralRemain), "ethaccBal")
+
+  })
+
+  // Test mappings
+  it("Tests mappings", async () => {
+
+    let mapCDPData = await coin.mapCDPData(CDP);
+    assert.equal(mapCDPData.collateral, collateralRemain, "correct collateral");
+    assert.equal(mapCDPData.debt, debtRemain, "correct debt");
+
+  })
+}
+
+function liquidateCDP(_acc, _bp) {
+
+    var existingDebt = 0; var existingCollateral = 0; var CDP;
+
+  it("Allows liquidation of CDP", async () => {
+
+    const CDP = BN2Int(await coin.mapAddressMemberData.call(_acc))
+    existingDebt = BN2Int((await coin.mapCDPData.call(CDP)).debt)
+    existingCollateral = BN2Int((await coin.mapCDPData.call(CDP)).collateral)
+    console.log(existingDebt, existingCollateral)
+    const canLiquidate = checkLiquidateCDP(existingCollateral, existingDebt)
+    const canLiquidateSC = await coin.checkLiquidationPoint(CDP)
+    assert.equal(canLiquidateSC, canLiquidate, "canLiquidate is correct")
+    //console.log('canLiquidate', CDP, existingDebt, existingCollateral, canLiquidate)
+
+    if (canLiquidateSC){
+      const liquidatedCollateral = roundBN2Str(existingCollateral / (10000 / _bp))
+      const debtDeleted = roundBN2Str(existingDebt / (10000 / _bp))
+      const maiBought = roundBN2Str((getEtherPPinMAI(liquidatedCollateral)))
+      const fee = roundBN2Str(maiBought - debtDeleted)
+      console.log(liquidatedCollateral, debtDeleted, maiBought, fee)
+
+      console.log(CDP, _bp)
+      let tx1 = await coin.liquidateCDP(CDP, _bp, { from: _acc });
+      console.log(tx1.logs)
+      assert.equal(tx1.logs.length, 1, "Three events were triggered");
+      assert.equal(tx1.logs[0].event, "LiquidateCDP", "Correct event");
+      assertLog(roundBN2Str(tx1.logs[0].args.etherSold), liquidatedCollateral, "Correct liquidatedCollateral");
+      assertLog(roundBN2Str(tx1.logs[0].args.maiBought), maiBought, "Correct maiBought");
+      assertLog(roundBN2Str(tx1.logs[0].args.debtDeleted), debtDeleted, "Correct debtDeleted");
+      assertLog(roundBN2Str(tx1.logs[0].args.feeClaimed), fee, "Correct fee");
+
+    }
+  })
+
+}
+
+//################################################################
+// CORE ARITHMETIC
+
 function getValueInMai(token) {
   var result
   if (token == ethAddr) {
@@ -373,6 +423,20 @@ function getMAIPPInUSD(amount) {
   const outputUSD = _getCLPSwap(amount.toString(), maiBal, usdBal);
   //console.log(maiBal, usdBal, outputUSD)
   return outputUSD;
+}
+
+function checkLiquidateCDP(_collateral, _debt){
+  const etherBal = etherPool.asset
+  const maiBal = etherPool.mai
+  const outputMai = _getCLPLiquidation(_collateral, etherBal, maiBal);
+  //console.log("details", outputMai, _debt)
+  var canLiquidate
+  if(outputMai < _debt) {
+      canLiquidate = true;
+  } else {
+      canLiquidate = false;
+  }
+  return canLiquidate;
 }
 
 function _getCLPSwap(x, X, Y) {

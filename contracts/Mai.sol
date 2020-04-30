@@ -89,7 +89,7 @@ contract Mai is ERC20{
     event NewCDP(uint32 CDP, uint time, address owner, uint256 debtIssued, uint256 collateralHeld, uint256 collateralisation);
     event UpdateCDP(uint32 CDP, uint time, address owner, uint256 debtAdded, uint256 collateralAdded, uint256 collateralisation);
     event CloseCDP(uint32 CDP, uint time, address owner, uint256 debtPaid, uint256 etherReturned);
-    event LiquidateCDP(uint32 CDP, uint time, address liquidator, uint256 liquidation, uint256 etherSold, uint256 maiBought, uint256 debtBurnt, uint256 feeClaimed);
+    event LiquidateCDP(uint32 CDP, uint time, address liquidator, uint256 liquidation, uint256 etherSold, uint256 maiBought, uint256 debtDeleted, uint256 feeClaimed);
     event Transfer (address indexed from, address indexed to, uint256 amount);
     event Approval ( address indexed owner, address indexed spender, uint256 amount);
 
@@ -243,7 +243,7 @@ contract Mai is ERC20{
 
     function liquidateCDP(uint32 CDP, uint256 liquidation) public returns (bool success){
         require(CDP > 0, "must be greater than 0");
-        require(CDP <= countOfCDPs, "must be less than maximum");
+        require(CDP <= countOfCDPs, "must exist");
         require(liquidation > 0, 'Liquidation must be greater than 0'); //require liquidation to be greater than 0
         require(liquidation <= 3333, 'Liquidation must be less than 33%');
         if (checkLiquidationPoint(CDP)){
@@ -252,13 +252,14 @@ contract Mai is ERC20{
             uint256 basisPoints = 10000;
             uint256 liquidatedCollateral = collateral.div(basisPoints.div(liquidation));
             uint256 debtDeleted = debt.div(basisPoints.div(liquidation));
-            uint256 maiBought = getMAIPPInUSD(liquidatedCollateral);
+            //TODO actually sell it
+            uint256 maiBought = getEtherPPinMAI(liquidatedCollateral);
             uint256 fee = maiBought - debtDeleted;
             mapCDPData[CDP].collateral -= liquidatedCollateral;
             mapCDPData[CDP].debt -= debtDeleted;
             emit LiquidateCDP(CDP, now, msg.sender, liquidation, liquidatedCollateral, maiBought, debtDeleted, fee);
             _burn(debtDeleted);
-            require(_transfer(address(this), address(msg.sender), fee), "must transfer fee");
+            //require(_transfer(address(this), address(msg.sender), fee), "must transfer fee");
             return true;
         }   else {
             return false;
@@ -341,6 +342,4 @@ contract Mai is ERC20{
         y = numerator.div(denominator);
         return y;
     }
-
-
 }
