@@ -19,14 +19,14 @@ contract('Mai', function (accounts) {
   constructor(accounts)
   // checkMath(_1)
   // checkPrices()
-  // openCDP(_dot01, 150, acc1)
-  // openCDP(_dot01, 150, acc1)
-  // openCDP(_dot01, 101, acc1)
+  openCDP(_dot01, 150, acc1)
+  openCDP(_dot01, 150, acc1)
+  openCDP(_dot01, 101, acc1)
   testFailCDP(_dot01, 100, acc1)
-  // closeCDP(acc1, 5000)
-  // openCDP(_dot01, 150, acc1)
-  // addCollateralToCDP(acc1)
-  // closeCDP(acc1, 10000)
+  closeCDP(acc1, 5000)
+  openCDP(_dot01, 150, acc1)
+  addCollateralToCDP(acc1)
+  closeCDP(acc1, 10000)
 })
 
 function BN2Int(BN) { return +(new BigNumber(BN)).toFixed() }
@@ -34,6 +34,14 @@ function BN2Str(BN) { return (new BigNumber(BN)).toFixed() }
 function int2BN(int) { return (new BigNumber(int)) }
 function int2Str(int) { return ((int).toString()) }
 function int2Num(int) {return (int/(1*10**18))}
+function roundBN2Str(BN) {
+  const BN_ = (new BigNumber(BN)).toPrecision(8)
+  return BN2Str(BN_)
+}
+function roundBN2StrR(BN, x) {
+  const BN_ = (new BigNumber(BN)).toPrecision(x)
+  return BN2Str(BN_)
+}
 
 function constructor(accounts) {
 
@@ -108,27 +116,24 @@ function openCDP(_eth, _ratio, _acc) {
   var newDebt; var newCollateral;
 
   it("Allows opening CDP", async () => {
-
-    console.log(_acc)
-
     //CDP = (await coin.mapAddressMemberData.call(_acc)).CDP
     const CDP = BN2Int(await coin.mapAddressMemberData.call(_acc))
-    console.log("CDP:", CDP)
+    //console.log("CDP:", CDP)
     if(CDP > 0){
       existingDebt = BN2Int((await coin.mapCDPData.call(CDP)).debt)
       existingCollateral = new BigNumber((await coin.mapCDPData.call(CDP)).collateral)
     }
 
-    newCollateral = _eth
-    const ethPPInMAI = BN2Str(await coin.getEtherPPinMAI(int2Str(_eth)))
-    //console.log(logType(ethPPInMAI))
-    const ethPP = getEtherPPinMAI(int2Str(_eth)).toString()
+    const ethPPInMAI = roundBN2Str(await coin.getEtherPPinMAI(int2Str(_eth)))
+    //console.log("type", logType(ethPPInMAI)); console.log('ethPPInMAI',ethPPInMAI)
+    const ethPP = roundBN2Str(getEtherPPinMAI(int2Str(_eth)).toString())
     //console.log(logType(ethPP))
-    assertLog(ethPPInMAI, ethPP, "etherPP is correct")
+    assert.equal(ethPPInMAI, ethPP, "etherPP is correct")
     //console.log(ethPPInMAI, ethPP)
     const mintAmount = (BN2Int(ethPPInMAI) * 100) / (_ratio);
     //console.log("mintAmount", mintAmount)
-    newDebt = mintAmount
+    newDebt = roundBN2Str(mintAmount)
+    newCollateral = _eth
  
     var tx1;
     if (_ratio === 150) {
@@ -141,12 +146,12 @@ function openCDP(_eth, _ratio, _acc) {
     assert.equal(tx1.logs.length, 3, "one event was triggered");
     assert.equal(tx1.logs[0].event, "Transfer", "Transfer was called");
     assert.equal(tx1.logs[0].args.to, maiAddress, "To is correct");
-    assertLog(tx1.logs[0].args.amount, int2Str(newDebt), "newDebt is correct")
+    assert.equal(roundBN2Str(tx1.logs[0].args.amount), newDebt, "newDebt is correct")
     assert.equal(tx1.logs[1].event, "Transfer", "Transfer was called");
     assert.equal(tx1.logs[1].args.to, _acc, "To is correct");
-    assertLog(tx1.logs[1].args.amount, int2Str(newDebt), "newDebt is correct")
+    assert.equal(roundBN2Str(tx1.logs[1].args.amount), newDebt, "newDebt is correct")
     assert.equal(tx1.logs[2].event, "NewCDP", "New CDP event was called");
-    assertLog(tx1.logs[2].args.debtIssued, int2Str(newDebt), "newDebt is correct")
+    assert.equal(roundBN2Str(tx1.logs[2].args.debtIssued), newDebt, "newDebt is correct")
     assert.equal(BN2Int(tx1.logs[2].args.collateralHeld), int2Str(newCollateral), "Collateral is correct");
   });
 
@@ -155,11 +160,11 @@ function openCDP(_eth, _ratio, _acc) {
     let maiAddressBal = BN2Int(await coin.balanceOf(maiAddress))
     assert.equal(maiAddressBal, 0, "correct maiAddressBal bal");
 
-    let acc0Bal = BN2Int(await coin.balanceOf(_acc))
-    assertLog(acc0Bal, (newDebt + +existingDebt), "correct _acc bal");
+    let acc0Bal = roundBN2Str(await coin.balanceOf(_acc))
+    assert.equal(acc0Bal, roundBN2Str((+newDebt + +existingDebt)), "correct _acc bal");
 
-    let maiSupply = BN2Int(await coin.totalSupply())
-    assertLog(maiSupply, (newDebt + +existingDebt), "correct new supply")
+    let maiSupply = roundBN2Str(await coin.totalSupply())
+    assert.equal(maiSupply, roundBN2Str((+newDebt + +existingDebt)), "correct new supply")
     //console.log(maiAddressBal, acc0Bal, maiSupply)
 
   })
@@ -176,7 +181,7 @@ function openCDP(_eth, _ratio, _acc) {
 
     let mapCDPData = await coin.mapCDPData(_CDP);
     assert.equal(mapCDPData.collateral, +newCollateral + +existingCollateral, "CDP Collateral")
-    assertLog(mapCDPData.debt, newDebt + +existingDebt, "CDP Debt");
+    assert.equal(roundBN2Str(mapCDPData.debt), roundBN2Str(+newDebt + +existingDebt), "CDP Debt");
     assert.equal(mapCDPData.owner, _acc, "correct owner");
   })
 }
@@ -184,21 +189,11 @@ function openCDP(_eth, _ratio, _acc) {
 
 
 function testFailCDP(_eth, _ratio, _acc){
-  var existingDebt = 0; var existingCollateral = 0; var newCollateral;
 
   it("tests <101 collaterisation fails to open CDP", async () => {
-
-    const CDP = BN2Int(await coin.mapAddressMemberData.call(_acc))
-
-    if(CDP > 0){
-      existingDebt = BN2Int((await coin.mapCDPData.call(CDP)).debt)
-      existingCollateral = new BigNumber((await coin.mapCDPData.call(CDP)).collateral)
-    }
-    newCollateral = _eth
     
     var tx1 =  await truffleAssert.reverts(coin.openCDP(_ratio, { from: _acc , value:_eth}));
-   
-    
+
   });
 }
 
@@ -354,11 +349,11 @@ function closeCDP(_acc, _bp) {
     //console.log(accEth1, etherReturned, gasCost)
     //console.log((accEth1 + etherReturned) - gasCost)
 
-    let accEth2 = await web3.eth.getBalance(_acc)
-    assertLog(accEth2, (+accEth1 + +BN2Int(existingCollateral) - gasCost), "gas test")
+    let accEth2 = roundBN2StrR(await web3.eth.getBalance(_acc),3)
+    assert.equal(accEth2, roundBN2StrR((+accEth1 + +BN2Int(existingCollateral) - gasCost),3), "gas test")
 
-    let accEthMAI = await web3.eth.getBalance(maiAddress)
-    assertLog(accEthMAI, collateralRemain, "ethaccBal")
+    let accEthMAI = roundBN2Str(await web3.eth.getBalance(maiAddress))
+    assert.equal(accEthMAI, roundBN2Str(collateralRemain), "ethaccBal")
   
   })
 
