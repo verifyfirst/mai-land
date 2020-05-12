@@ -129,9 +129,9 @@ function openCDP(_eth, _ratio, _acc) {
   var newDebt; var newCollateral;
 
   it("Allows opening CDP", async () => {
-    //CDP = (await coin.mapAddressMemberData.call(_acc)).CDP
+   
     const CDP = BN2Int(await coin.mapAddressMemberData.call(_acc))
-    //console.log("CDP:", CDP)
+
     if (CDP > 0) {
       existingDebt = BN2Int((await coin.mapCDPData.call(CDP)).debt)
       existingCollateral = new BigNumber((await coin.mapCDPData.call(CDP)).collateral)
@@ -169,7 +169,7 @@ function openCDP(_eth, _ratio, _acc) {
   });
 
   //test balance of account 0 for mai has increased
-  it("tests balances of MAI", async () => {
+  it("tests balances of MAI are correct", async () => {
     let maiAddressBal = BN2Int(await coin.balanceOf(maiAddress))
     assert.equal(maiAddressBal, 0, "correct maiAddressBal bal");
 

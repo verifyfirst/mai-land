@@ -8,7 +8,7 @@ import Breakpoint from 'react-socks';
 import Footer from './Footer'
 
 const Sidebar = (props) => {
-
+  
   const menu_items = [
     "overview",
     "cdps",
@@ -59,8 +59,6 @@ const Sidebar = (props) => {
   }
 
   return (
-
-    
     <Layout.Sider style={sidebarStyles} trigger={null} collapsible breakpoint="md"
     collapsedWidth="80">
 

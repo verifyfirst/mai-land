@@ -1,11 +1,9 @@
 import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { Layout } from 'antd';
-
 import { BreakpointProvider } from 'react-socks';
-
-import Header from './components/layout/Header'
 import Sidebar from './components/layout/Sidebar'
+import Header from './components/layout/Header'
 
 import Overview from './components/pages/Overview'
 import CDPs from './components/pages/CDPs'
