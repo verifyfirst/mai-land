@@ -9,9 +9,7 @@ const Overview = (props) => {
 
     return (
         <div>
-            <FloatCard left="400px" title="CDPS"></FloatCard>
-            <FloatCard left="700px" title="POOLS"></FloatCard>
-            <FloatCard left="1000px" title="ANCHORS"></FloatCard>
+            
             <Row style={{paddingLeft:20, backgroundColor:"#E3EAE5", paddingBottom:100}}>
 
                 <Col xs={17} style={{marginTop:20}}>
@@ -41,8 +39,20 @@ const Overview = (props) => {
                 <Col xs={2}>
                 <br></br><br></br><br></br>
                     <Logo/>
-                </Col>
+                </Col> 
             </Row>
+            <Row >
+                    <Col>
+                       <FloatCard left="20px" title="CDPS"></FloatCard>
+                       </Col>
+                       <Col>
+                       <FloatCard left="20px" title="POOLS"></FloatCard>
+                       </Col>
+                       <Col>
+                       <FloatCard left="20px" title="ANCHORS"></FloatCard>
+                       </Col>
+            </Row>
+
             <Row style={{paddingLeft:20, marginTop:100}}>
                 <H2>Collaterised Debt Positions</H2>
             </Row>

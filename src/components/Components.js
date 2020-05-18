@@ -202,13 +202,12 @@ export const PillTextFil = (props) => {
 export const FloatCard = (props) => {
 
   let styles = {...defaultStyles, ...props.style || {}}
-
   styles.padding = "10px 40px 10px 40px"
   styles.fontSize = "14px"
   styles.color = "#FFF"
   styles.position = "absolute"
-  styles.top = "280px"
-  styles.left = "400px"
+  styles.top = "-100px"
+  styles.left = "200px"
   styles.zIndex = 1
   styles.backgroundColor = "#fff"
   styles.boxShadow =  "0 0px 8px 0 #A3F7BF"

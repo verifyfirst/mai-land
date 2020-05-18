@@ -5,6 +5,7 @@ body {
     color: #222831;
     letter-spacing: 0;
   }
+
   
   .ant-menu {
     background-color: #393E46;
@@ -30,7 +31,10 @@ body {
     background: #fff;
     box-shadow: 0 2px 8px 0 #393E46;
     z-index: 10;
-    position: relative;
+    position: static;
+    font-family: 'Exo 2'; 
+    font-size: 42px;
+    color: #848E9C;
   }
   
   .button {
