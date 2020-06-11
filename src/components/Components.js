@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from "prop-types";
-import { Button as AntButton, Row, Col } from "antd"
+import { Button as AntButton, Row, Col, Card } from "antd"
 
 const defaultStyles = {
   color: "#222831",
@@ -203,26 +203,24 @@ export const FloatCard = (props) => {
 
   let styles = {...defaultStyles, ...props.style || {}}
   styles.padding = "10px 40px 10px 40px"
+  styles.margin= "20px 20px 0px 20px"
+  styles.width="320px"
   styles.fontSize = "14px"
-  styles.color = "#FFF"
-  styles.position = "absolute"
-  styles.top = "-100px"
+  styles.position = "relative"
+  styles.top = "-50px"
   styles.left = "200px"
-  styles.zIndex = 1
-  styles.backgroundColor = "#fff"
   styles.boxShadow =  "0 0px 8px 0 #A3F7BF"
   styles.borderRadius = "9px"
+  
 
   if (props.left) {
     styles.left = props.left
   }
 
   return (
-    <div style={styles}>
-      <Row>
-        <H2>{props.title}</H2>
-      </Row>
-      <Row>
+   
+      <Card title={props.title} style={styles}>
+        <Row>
         <Col xs={9}>
           <Label>12</Label><br />
           <LabelGrey> NUMBER</LabelGrey>
@@ -242,8 +240,8 @@ export const FloatCard = (props) => {
           <LabelGrey> NUMBER</LabelGrey>
         </Col>
       </Row>
-    </div>
+    </Card>
+     
+  
   )
 }
-
-

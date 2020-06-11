@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from "react-router-dom";
 import { Menu, Layout } from 'antd';
 import { Text } from '../Components'
-
+import { HomeOutlined, WalletOutlined, DeploymentUnitOutlined, ForkOutlined, QuestionOutlined, EditOutlined} from '@ant-design/icons';
 import Breakpoint from 'react-socks';
 
 import Footer from './Footer'
@@ -10,12 +10,12 @@ import Footer from './Footer'
 const Sidebar = (props) => {
   
   const menu_items = [
-    "overview",
-    "cdps",
-    "pools",
-    "anchors",
-    "about",
-    "testing"
+  {"Title" : "overview", "Icon": <HomeOutlined />},
+   {"Title" : "cdps", "Icon":<WalletOutlined />},
+    {"Title" : "pools", "Icon":<DeploymentUnitOutlined />},
+    {"Title" : "anchors", "Icon":<ForkOutlined />},
+    {"Title" : "about", "Icon":<QuestionOutlined />},
+    {"Title" : "testing", "Icon":<EditOutlined />}
   ]
 
   const [page, setPage] = useState(null)
@@ -32,7 +32,7 @@ const Sidebar = (props) => {
     backgroundColor: "#29A19C",
     color: "#fff",
   }
-
+ 
   const getStyles = (key) => {
     if (key === page) {
       return selected_styles
@@ -63,10 +63,12 @@ const Sidebar = (props) => {
     collapsedWidth="80">
 
   <Breakpoint small down>
+  
       <Menu onClick={handleClick} mode="inline" theme="dark" selectedKeys={[page]}>
-        {menu_items.map((item) => (
-          <Menu.Item key={item} style={getStyles(item)}>
-            <Link to={"/" + item}>             
+        {menu_items.map(({Title, Icon}) => (
+          <Menu.Item key={Title} style={getStyles(Title)}>
+            <Link to={"/" + Title}>
+              {Icon}
             </Link>
           </Menu.Item>
         ))}
@@ -76,10 +78,10 @@ const Sidebar = (props) => {
 
     <Breakpoint medium up>
       <Menu onClick={handleClick} mode="inline" theme="dark" selectedKeys={[page]}>
-        {menu_items.map((item) => (
-          <Menu.Item key={item} style={getStyles(item)}>
-            <Link to={"/" + item}>             
-                <span>{isSelected(item) ? <Text bold={true} color="#FFF">{item}</Text> : <Text bold={true} color="#848E9C">{item}</Text>}</span>
+        {menu_items.map(({Title}) => (
+          <Menu.Item key={Title} style={getStyles(Title)}>
+            <Link to={"/" + Title}>             
+                <span>{isSelected(Title) ? <Text bold={true} color="#FFF">{Title}</Text> : <Text bold={true} color="#848E9C">{Title}</Text>}</span>
             </Link>
           </Menu.Item>
         ))}

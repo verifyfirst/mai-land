@@ -53,7 +53,7 @@ const Overview = (props) => {
                        </Col>
             </Row>
 
-            <Row style={{paddingLeft:20, marginTop:100}}>
+            <Row style={{paddingLeft:20, marginTop:50}}>
                 <H2>Collaterised Debt Positions</H2>
             </Row>
             <Row style={{paddingLeft:20}}>
