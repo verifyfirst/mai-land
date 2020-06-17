@@ -6,12 +6,12 @@ import Sidebar from './components/layout/Sidebar'
 import Header from './components/layout/Header'
 
 import Overview from './components/pages/Overview'
-import CDPs from './components/pages/CDPs'
+import CDPs from './components/pages/cdp'
 import Pools from './components/pages/Pool'
 import Anchors from './components/pages/Anchors'
 import About from './components/pages/About'
 import Testing from './components/pages/Testing'
-
+import { ContextProvider } from './context'
 import 'antd/dist/antd.css'
 import './App.css'
 
@@ -21,6 +21,7 @@ const App = (props) => {
   return (
     <Router>
         <div>
+        <ContextProvider>
         <BreakpointProvider>
           <Layout>
             <Header />
@@ -40,6 +41,7 @@ const App = (props) => {
             </Layout>
           </Layout>
           </BreakpointProvider>
+          </ContextProvider>
         </div>
       </Router>
   );

@@ -19,6 +19,27 @@ export const H1 = (props) => {
     </span>
   )
 }
+export const Colour = (alpha) => {
+  var colour
+  if(alpha){
+    colour = {
+      "yellow":'rgba(255, 206, 86, ' + alpha + ')'
+    }
+  } else {
+    colour = {
+      "black":"#110D01", 
+      "white":"#FFF",
+      "dgrey": "#2B2515",
+      "grey": "#97948E",
+      "lgrey": "#F4F4F2",
+      "rust": "#795900",
+      "gold":"#D09800",
+      "yellow":'#FFCE56'
+    }
+  }
+  
+  return colour
+}
 
 
 export const H2 = (props) => {
@@ -124,6 +145,25 @@ export const PillText = (props) => {
   )
 }
 
+export const Sublabel = (props) => {
+  let styles = {...props.style || {}}
+  styles.fontSize = "14px"
+  styles.fontWeight = ""
+  styles.color = Colour().white
+  styles.margin = "20px 0px"
+
+    if (props.margin) {
+    styles.margin = props.margin
+  }
+
+  return (
+    <span style={styles}>
+      {props.children}
+    </span>
+  )
+}
+
+
 export const PillTextFill = (props) => {
   let styles = {...defaultStyles, ...props.style || {}}
   styles.backgroundColor = "#F0B90B"
@@ -143,7 +183,11 @@ export const Center = (props) => (
     {props.children}
   </div>
 )
-
+export const Gap = () => (
+  <div>
+    <br></br><br></br>
+  </div>
+)
 const Button = (props) => {
   let styles = {...defaultStyles, ...props.style || {}}
   styles.borderRadius = 9
@@ -199,6 +243,22 @@ export const PillTextFil = (props) => {
   )
 }
 
+export const Subtitle = (props) => {
+  let styles = {...props.style || {}}
+  styles.fontSize = "14px"
+  styles.color = Colour().black
+  styles.margin = "20px 0px"
+
+  if (props.margin) {
+    styles.margin = props.margin
+  }
+  return (
+    <span style={styles}>
+      {props.children}
+    </span>
+  )
+}
+
 export const FloatCard = (props) => {
 
   let styles = {...defaultStyles, ...props.style || {}}
@@ -218,8 +278,7 @@ export const FloatCard = (props) => {
   }
 
   return (
-   
-      <Card title={props.title} style={styles}>
+    <Card title={props.title} style={styles}>
         <Row>
         <Col xs={9}>
           <Label>12</Label><br />
@@ -241,7 +300,7 @@ export const FloatCard = (props) => {
         </Col>
       </Row>
     </Card>
-     
-  
   )
 }
+
+
