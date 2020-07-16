@@ -8,6 +8,11 @@ export class ContextProvider extends React.Component {
     children: PropTypes.any,
   };
 
+  state = {
+    wallet: null
+  };
+
+
   // reimplementation of setState, but specifically for context state.
   setContext = (state, fn) => {
     this.setState(state, () => {

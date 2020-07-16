@@ -1,101 +1,71 @@
+.App {
+  text-align: center;
+}
 
-body {
-    font-family: 'Exo 2', 'sans-serif'; 
-    font-size: 18px;
-    color: #222831;
-    letter-spacing: 0;
-  }
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
 
-  
-  .ant-menu {
-    background-color: #393E46;
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
   }
-  
-  .ant-menu-item-selected > a, .ant-menu-item-selected > a:hover {
-      color: #29A19C;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
   }
-  
-  .ant-menu-item > a:hover {
-      color: #A3F7BF;
+  to {
+    transform: rotate(360deg);
   }
-  
-  div.ant-row.ant-form-item.form-100 > div {
-    width: 98%
-  }
-  
-  .ant-menu-inline, .ant-menu-vertical, .ant-menu-vertical-left {
-    border: none;
-  }
-  
-  .header-container {
-    background: #fff;
-    box-shadow: 0 2px 8px 0 #393E46;
-    z-index: 10;
-    position: static;
-    font-family: 'Exo 2'; 
-    font-size: 42px;
-    color: #848E9C;
-  }
-  
-  .button {
-    background: #29A19C; 
-    border-radius: 9px; 
-    font-family: Helvetica-Bold; 
-    font-size: 18px;
-    color: #FFFFFF; 
-    letter-spacing: 0; 
-    text-align: center;
-  }
-  
-  .pill {
-    background: #e3e5ea; 
-    border-radius: 28px; 
-    font-family: 'Exo 2'; 
-    font-size: 18px;
-    color: #8B9796; 
-    letter-spacing: 0;
-  }
-  
-  .text-box-area {
-    border: 1px solid #29A19C; 
-    border-radius: 6px;
-  }
-  
-  .text-box-input {
-    background: #F8F8F8; 
-    border: 1px solid #8B9796;
-    border-radius: 8px;
-    font-family: 'Exo 2'; 
-    font-size: 18px;
-    color: #8B9796;
-    letter-spacing: 0;
-    line-height: 23px;
-  }
-  
-  .h1 {
-    font-family: 'Exo 2'; 
-    font-size: 42px;
-    color: #848E9C;
-    letter-spacing: 0;
-  }
-  
-  .text {
-    font-family: 'Open Sans'; 
-    font-size: 18px;
-    color: #848E9C;
-    letter-spacing: 0;
-  }
-  
-  .text-bold {
-    font-family: 'Open Sans';  
-    font-size: 18px;
-    color: #848E9C; 
-    letter-spacing: 0;
-  }
-  
-  .text-bg {
-    background: #e3e5ea;
-  }
-  
-  /*============================*/
-  
+}
+
+.site-layout-content {
+  background: #fff;
+  padding: 24px;
+  min-height: 280px;
+}
+#components-layout-demo-top .logo {
+  width: 120px;
+  height: 31px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 16px 24px 16px 0;
+  float: left;
+}
+
+.ant-tabs-nav-scroll {
+  display: flex;
+  justify-content: center;
+}
+
+/* .ant-drawer-body {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  padding: 0px;
+  overflow: auto;
+  font-size: 14px;
+  line-height: 1.5715;
+  word-wrap: break-word;
+}
+
+.ant-table-cell{
+  padding:'0px'
+} */
