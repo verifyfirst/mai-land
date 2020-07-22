@@ -2,12 +2,13 @@ import Web3 from 'web3'
 import baseContract from '../artifacts/MAI.json'
 import ERC20 from '../artifacts/ERC20.json'
 
-export const MAI_ADDRESS = '0x048Aec85838ABC6912552F43e9eD961cA92F4e0C'
+export const MAI_ADDRESS = '0x3125f10CFd45e819dEFd0132f8Bb348b43C2f55a'
 export const ETH_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 //================########  Web3 RPC Construction ##########================
 export const getWeb3 = () => {
     return new Web3(Web3.givenProvider || "http://localhost:7545")
+   //return new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/75295055d9ac44588fafa61561fa45f8"));
 }
 export const getEtherscanURL = () => {
     return "https://etherscan.io/"

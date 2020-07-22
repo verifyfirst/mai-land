@@ -12,7 +12,7 @@ import Overview from './ui/pages/Overview'
 import Pools from './ui/pages/Pools'
  import CDPs from './ui/pages/CDPs'
 import PriceAnchor from './ui/pages/PriceAnchor'
-import About from './ui/pages/About'
+//import About from './ui/pages/About'
 
 import Stake from './ui/pages/Stake'
 import Swap from './ui/pages/Swap'

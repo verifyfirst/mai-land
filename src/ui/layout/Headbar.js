@@ -18,7 +18,7 @@ const Headbar = (props) => {
     const [retry, setRetry]= useState(0)
     useEffect(() => {
         getData()
-    }, [context.transaction,metamask])
+    }, [context.transaction, metamask])
 
 
      const getData = async () =>{
@@ -57,9 +57,12 @@ const Headbar = (props) => {
     {   if (window.ethereum) {
         try {
           // Request account access if needed
-          await window.ethereum.enable();
+          let web3 = await window.ethereum.enable();
           // Acccounts now exposed
-          setMetaMask(true)
+          if(web3){
+            setMetaMask(true)
+          }
+          
         } catch (error) {
           // User denied account access...
         }
