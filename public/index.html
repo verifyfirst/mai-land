@@ -2,23 +2,39 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta name="keywords" content="Stablecoin,DEFI,Ethereum">
-
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-
-
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@100;300;400;600;700&family=Open+Sans&display=swap" rel="stylesheet">
-
-    <title>MAI-Land DApp</title>
+    <meta
+      name="description"
+      content="Incentivised Liquidity Pools"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>Pools DApp</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-
   </body>
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.16.1/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyBi7yQGI7ZTPAjqLB5g33gPkjg0ochc7J8",
+    authDomain: "mai-land.firebaseapp.com",
+    databaseURL: "https://mai-land.firebaseio.com",
+    projectId: "mai-land",
+    storageBucket: "mai-land.appspot.com",
+    messagingSenderId: "727762405797",
+    appId: "1:727762405797:web:fe578f942c8bbb87c2004c"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+</script>
 </html>

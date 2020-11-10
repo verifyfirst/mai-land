@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/static/css/main.ab7b35e1.chunk.css",
+    "main.js": "/static/js/main.9963adae.chunk.js",
+    "main.js.map": "/static/js/main.9963adae.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.4bf9777a.js",
+    "runtime-main.js.map": "/static/js/runtime-main.4bf9777a.js.map",
+    "static/css/2.4deadad5.chunk.css": "/static/css/2.4deadad5.chunk.css",
+    "static/js/2.3317afd6.chunk.js": "/static/js/2.3317afd6.chunk.js",
+    "static/js/2.3317afd6.chunk.js.map": "/static/js/2.3317afd6.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.c2d70118c0a810eee791acc0b06adf50.js": "/precache-manifest.c2d70118c0a810eee791acc0b06adf50.js",
+    "service-worker.js": "/service-worker.js",
+    "static/css/2.4deadad5.chunk.css.map": "/static/css/2.4deadad5.chunk.css.map",
+    "static/css/main.ab7b35e1.chunk.css.map": "/static/css/main.ab7b35e1.chunk.css.map",
+    "static/js/2.3317afd6.chunk.js.LICENSE.txt": "/static/js/2.3317afd6.chunk.js.LICENSE.txt",
+    "static/media/MAI-LOGO.svg": "/static/media/MAI-LOGO.7cc8e08b.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.4bf9777a.js",
+    "static/css/2.4deadad5.chunk.css",
+    "static/js/2.3317afd6.chunk.js",
+    "static/css/main.ab7b35e1.chunk.css",
+    "static/js/main.9963adae.chunk.js"
+  ]
+}

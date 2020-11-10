@@ -1,51 +1,73 @@
-import React from 'react'
+import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { Layout } from 'antd';
-
-import { BreakpointProvider } from 'react-socks';
-
-import Header from './components/layout/Header'
-import Sidebar from './components/layout/Sidebar'
-
-import Overview from './components/pages/Overview'
-import CDPs from './components/pages/CDPs'
-import Pools from './components/pages/Pool'
-import Anchors from './components/pages/Anchors'
-import About from './components/pages/About'
-import Testing from './components/pages/Testing'
-
+import './App.css';
 import 'antd/dist/antd.css'
-import './App.css'
+import { Colour } from './ui/components/elements'
+
+import Headbar from './ui/layout/Headbar'
+// import Footer from './ui/layout/Footer'
+
+import Overview from './ui/pages/Overview'
+import Pools from './ui/pages/Pools'
+ import CDPs from './ui/pages/CDPs'
+import PriceAnchor from './ui/pages/PriceAnchor'
+//import About from './ui/pages/About'
+
+import Stake from './ui/pages/Stake'
+import Swap from './ui/pages/Swap'
+import CreatePool from './ui/pages/CreatePool'
+import AnchorPool from './ui/pages/createAnchor'
+import ManageCDP from './ui/pages/manageCDP'
+import OpenCDP from './ui/pages/openCDP'
+import Liquidate from './ui/pages/liquidate'
+import { ContextProvider } from './context'
 
 const { Content } = Layout;
 
-const App = (props) => {
-  return (
-    <Router>
-        <div>
-        <BreakpointProvider>
-          <Layout>
-            <Header />
-            <Layout style={{height:"100vh", psition:"relative"}}>
-              <Sidebar />
-              <Content style={{background: "#fff"}}>
-                <Switch>
-                  <Route path="/" exact component={Overview} />
-                  <Route path="/overview" exact component={Overview} />
-                  <Route path="/cdps" exact component={CDPs} />
-                  <Route path="/pools" exact component={Pools} />
-                  <Route path="/anchors" exact component={Anchors} />
-                  <Route path="/about" exact component={About} />
-                  <Route path="/testing" exact component={Testing} />
-                </Switch>
-              </Content>
-            </Layout>
-          </Layout>
-          </BreakpointProvider>
-        </div>
-      </Router>
-  );
+const contentStyles = {
+	background: Colour().white,
+	color: '#000',
+	// paddingLeft: 30,
+	// paddingTop: 20,
+	// paddingRight: 30,
+	// paddingBottom: 50,
+	padding:20,
+	// margin:40
+	// minHeight:'calc(100vh - 70px)'
 }
 
+const App = () => {
+	return (
+		<Router>
+			<div>
+				<ContextProvider>
+					<Layout style={{ height: "100vh", background:Colour().offwhite }}>
+						<Headbar />
+						<Content style={contentStyles}>
+							<Switch>
+								<Route path="/" exact component={Overview} />
+								<Route path="/overview" exact component={Overview} />
+								<Route path="/pools" exact component={Pools} />
+								<Route path="/CDPs" exact component={CDPs} />
+								<Route path="/anchor" exact component={PriceAnchor} />
+								<Route path="/anchor/create" exact component={AnchorPool} />
+								{/* <Route path="/about" exact component={About} /> */}
+								<Route path="/pool/stake" exact component={Stake} />
+								<Route path="/pool/swap" exact component={Swap} />
+								<Route path="/cdp/manageCDP" exact component={ManageCDP}/>
+								<Route path="/cdp/openCDP" exact component={OpenCDP}/>
+								<Route path="/cdp/Liquidate" exact component={Liquidate}/>
+								<Route path="/pool/create" exact component={CreatePool} />
+								
+							</Switch>
+						</Content>
+						{/* <Footer style={{height:50}}/> */}
+					</Layout>
+				</ContextProvider>
+			</div>
+		</Router>
+	);
+}
 
 export default App;
